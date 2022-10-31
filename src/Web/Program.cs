@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using Ardalis.ListStartupServices;
+using Azure.Identity;
 using BlazorAdmin;
 using BlazorAdmin.Services;
 using Blazored.LocalStorage;
@@ -20,6 +21,16 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
+
+
+var vaultName = builder.Configuration["ValutName"];
+Uri vaultUri = new Uri($"https://{vaultName}.vault.azure.net/");
+
+builder.Configuration.AddAzureKeyVault(vaultUri,
+  new DefaultAzureCredential(new DefaultAzureCredentialOptions
+  {
+      ManagedIdentityClientId = builder.Configuration["AzureADManagedIdentityClientId"]
+  }));
 
 Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 
